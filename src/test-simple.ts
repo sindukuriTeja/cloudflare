@@ -25,12 +25,7 @@ export class TaskAgent {
       message: "WebSocket ready!"
     }));
 
-    // Send chat history
-    const chats = (await this.state.storage.get("chats")) as any[] || [];
-    server.send(JSON.stringify({
-      type: "history",
-      chats: chats
-    }));
+    // Chat history will be sent after receiving userId from client
 
     // Handle incoming messages
     server.addEventListener("message", async (event: MessageEvent) => {
@@ -38,7 +33,7 @@ export class TaskAgent {
         const data = JSON.parse(event.data as string);
         
         if (data.type === "chat") {
-          await this.handleChat(data.content, data.chatId, server, data.attachments);
+          await this.handleChat(data.content, data.chatId, server, data.attachments, data.userId);
         } else if (data.type === "newChat") {
           const chatId = Date.now().toString();
           server.send(JSON.stringify({
@@ -46,7 +41,10 @@ export class TaskAgent {
             chatId: chatId
           }));
         } else if (data.type === "loadChat") {
-          await this.loadChat(data.chatId, server);
+          await this.loadChat(data.chatId, server, data.userId);
+        } else if (data.type === "init") {
+          // Send user-specific chat history
+          await this.sendUserHistory(data.userId, server);
         }
       } catch (error) {
         server.send(JSON.stringify({
@@ -62,15 +60,17 @@ export class TaskAgent {
     });
   }
 
-  async handleChat(message: string, chatId: string, ws: WebSocket, attachments?: any[]) {
+  async handleChat(message: string, chatId: string, ws: WebSocket, attachments?: any[], userId?: string) {
     try {
-      // Get or create chat
+      // Get or create chat with userId prefix
       const chats = (await this.state.storage.get("chats")) as any[] || [];
-      let chat = chats.find((c: any) => c.id === chatId);
+      const userChatId = userId ? `${userId}_${chatId}` : chatId;
+      let chat = chats.find((c: any) => c.id === userChatId);
       
       if (!chat) {
         chat = {
-          id: chatId,
+          id: userChatId,
+          userId: userId,
           title: message.substring(0, 50) || 'File upload',
           messages: [],
           createdAt: new Date().toISOString()
@@ -188,10 +188,11 @@ export class TaskAgent {
         chatId: chatId
       }));
 
-      // Send updated history
+      // Send updated user-specific history
+      const userChats = chats.filter((c: any) => c.userId === userId);
       ws.send(JSON.stringify({
         type: "history",
-        chats: chats.map((c: any) => ({
+        chats: userChats.map((c: any) => ({
           id: c.id,
           title: c.title,
           createdAt: c.createdAt
@@ -206,10 +207,10 @@ export class TaskAgent {
     }
   }
 
-  async loadChat(chatId: string, ws: WebSocket) {
+  async loadChat(chatId: string, ws: WebSocket, userId?: string) {
     try {
       const chats = (await this.state.storage.get("chats")) as any[] || [];
-      const chat = chats.find((c: any) => c.id === chatId);
+      const chat = chats.find((c: any) => c.id === chatId && (!userId || c.userId === userId));
       
       if (chat) {
         ws.send(JSON.stringify({
@@ -221,6 +222,27 @@ export class TaskAgent {
       ws.send(JSON.stringify({
         type: "error",
         content: "Load Error: " + (error as Error).message
+      }));
+    }
+  }
+
+  async sendUserHistory(userId: string, ws: WebSocket) {
+    try {
+      const chats = (await this.state.storage.get("chats")) as any[] || [];
+      const userChats = chats.filter((c: any) => c.userId === userId);
+      
+      ws.send(JSON.stringify({
+        type: "history",
+        chats: userChats.map((c: any) => ({
+          id: c.id,
+          title: c.title,
+          createdAt: c.createdAt
+        }))
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: "error",
+        content: "History Error: " + (error as Error).message
       }));
     }
   }

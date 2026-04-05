@@ -8,27 +8,40 @@ This application demonstrates all required components for the Cloudflare AI assi
 
 ### ✅ LLM Integration
 - Uses **Llama 3.3 70B** via Workers AI (Cloudflare's serverless GPU platform)
+- **LLaVA 1.5 7B** for image analysis and vision capabilities
 - Streaming responses for real-time interaction
-- Tool calling capabilities for task management
+- Multi-modal support (text and images)
 
 ### ✅ Workflow / Coordination
 - Built on **Durable Objects** for stateful coordination
-- Agents SDK for structured agent behavior
-- Automatic message persistence and stream resumption
-- Tool execution with state updates
+- Real-time WebSocket communication
+- Automatic message persistence
+- Per-user chat history management
 
 ### ✅ User Input (Chat Interface)
-- Real-time WebSocket-based chat interface
-- Clean, responsive UI with gradient design
-- Message history with user/assistant distinction
+- ChatGPT-style modern UI with dark theme
+- Real-time WebSocket-based chat
+- **Voice input** using Web Speech API
+- **Text-to-speech** for AI responses with auto-read option
+- **File upload** support (images, PDF, DOC, TXT, CSV, JSON)
+- **Drag & drop** and **clipboard paste** for images
+- Image preview thumbnails
 - Connection status monitoring
 
 ### ✅ Memory / State
-- Persistent state using Durable Objects SQL database
-- Task list stored in agent state
-- Conversation history counter
-- State syncs to connected clients in real-time
-- Survives restarts, deploys, and hibernation
+- Persistent chat history using Durable Objects storage
+- **Per-user chat separation** - each user has their own history
+- **Google OAuth authentication** (optional) for cross-device sync
+- Anonymous mode fallback with localStorage
+- Chat history sidebar with conversation management
+- Message attachments stored with conversations
+
+### 🆕 Authentication
+- **Google Sign-In** integration
+- User profile display with picture and name
+- Cross-device chat history sync for authenticated users
+- Optional anonymous mode for quick access
+- Secure OAuth 2.0 flow
 
 ## Architecture
 
@@ -76,6 +89,7 @@ cf_ai_task_assistant/
 ### Prerequisites
 - Node.js 18+ and npm
 - Cloudflare account (free tier works)
+- (Optional) Google OAuth credentials for authentication
 
 ### Setup
 
@@ -84,12 +98,17 @@ cf_ai_task_assistant/
 npm install
 \`\`\`
 
-2. Start the development server:
+2. (Optional) Configure Google OAuth:
+   - See [GOOGLE_AUTH_SETUP.md](./GOOGLE_AUTH_SETUP.md) for detailed instructions
+   - Update `GOOGLE_CLIENT_ID` in `wrangler.toml` and `src/index.ts`
+   - App works without this (anonymous mode)
+
+3. Start the development server:
 \`\`\`bash
 npm run dev
 \`\`\`
 
-3. Open your browser to the URL shown (typically http://localhost:8787)
+4. Open your browser to the URL shown (typically http://127.0.0.1:8787)
 
 The app will run locally using Cloudflare's local development environment with Workers AI.
 
@@ -109,14 +128,28 @@ Your app will be live at \`https://cf-ai-task-assistant.<your-subdomain>.workers
 
 ## Usage Examples
 
-Try these prompts in the chat interface:
+### Chat Interactions
+- Type any question or request
+- Use voice input by clicking the microphone button
+- Upload images for AI to analyze
+- Paste screenshots with Ctrl+V
+- Drag and drop files into the input area
 
-- "Create a task to review the quarterly report"
-- "List all my tasks"
-- "Mark the first task as in-progress"
-- "Create three tasks: buy groceries, call mom, finish homework"
-- "Show me completed tasks"
-- "Update task status to completed"
+### Authentication
+- Click "Sign in with Google" to authenticate
+- Your chat history will sync across devices
+- Or use anonymously without signing in
+
+### Voice Features
+- Click microphone to speak your message
+- Enable "Auto-read responses" for hands-free operation
+- Click speaker icon on any message to hear it read aloud
+
+### Example Prompts
+- "What's in this image?" (with image upload)
+- "Explain quantum computing"
+- "Write a creative story"
+- "Help me debug this code"
 
 ## How It Works
 
