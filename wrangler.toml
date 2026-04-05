@@ -15,13 +15,3 @@ class_name = "TaskAgent"
 [[migrations]]
 tag = "v1"
 new_classes = ["TaskAgent"]
-
-# Google OAuth Configuration
-# Replace these with your actual values from Google Cloud Console
-[vars]
-GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-GOOGLE_REDIRECT_URI = "http://127.0.0.1:8787/auth/callback"
-
-# For production, use secrets for sensitive data:
-# Run: wrangler secret put GOOGLE_CLIENT_SECRET
-# Then enter your client secret when prompted

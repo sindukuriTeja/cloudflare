@@ -31,17 +31,9 @@ This application demonstrates all required components for the Cloudflare AI assi
 ### ✅ Memory / State
 - Persistent chat history using Durable Objects storage
 - **Per-user chat separation** - each user has their own history
-- **Google OAuth authentication** (optional) for cross-device sync
-- Anonymous mode fallback with localStorage
+- User ID stored in browser localStorage
 - Chat history sidebar with conversation management
 - Message attachments stored with conversations
-
-### 🆕 Authentication
-- **Google Sign-In** integration
-- User profile display with picture and name
-- Cross-device chat history sync for authenticated users
-- Optional anonymous mode for quick access
-- Secure OAuth 2.0 flow
 
 ## Architecture
 
@@ -89,7 +81,6 @@ cf_ai_task_assistant/
 ### Prerequisites
 - Node.js 18+ and npm
 - Cloudflare account (free tier works)
-- (Optional) Google OAuth credentials for authentication
 
 ### Setup
 
@@ -98,17 +89,12 @@ cf_ai_task_assistant/
 npm install
 \`\`\`
 
-2. (Optional) Configure Google OAuth:
-   - See [GOOGLE_AUTH_SETUP.md](./GOOGLE_AUTH_SETUP.md) for detailed instructions
-   - Update `GOOGLE_CLIENT_ID` in `wrangler.toml` and `src/index.ts`
-   - App works without this (anonymous mode)
-
-3. Start the development server:
+2. Start the development server:
 \`\`\`bash
 npm run dev
 \`\`\`
 
-4. Open your browser to the URL shown (typically http://127.0.0.1:8787)
+3. Open your browser to the URL shown (typically http://127.0.0.1:8787)
 
 The app will run locally using Cloudflare's local development environment with Workers AI.
 
@@ -134,11 +120,6 @@ Your app will be live at \`https://cf-ai-task-assistant.<your-subdomain>.workers
 - Upload images for AI to analyze
 - Paste screenshots with Ctrl+V
 - Drag and drop files into the input area
-
-### Authentication
-- Click "Sign in with Google" to authenticate
-- Your chat history will sync across devices
-- Or use anonymously without signing in
 
 ### Voice Features
 - Click microphone to speak your message

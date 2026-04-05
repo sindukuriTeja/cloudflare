@@ -6,21 +6,6 @@ export default {
   async fetch(request: Request, env: any): Promise<Response> {
     const url = new URL(request.url);
 
-    // Google OAuth callback
-    if (url.pathname === "/auth/callback") {
-      return handleGoogleCallback(request, env);
-    }
-
-    // Get user info endpoint
-    if (url.pathname === "/auth/user") {
-      return getUserInfo(request);
-    }
-
-    // Logout endpoint
-    if (url.pathname === "/auth/logout") {
-      return logout();
-    }
-
     if (url.pathname === "/test") {
       return new Response(TEST_HTML, {
         headers: { "Content-Type": "text/html" },
@@ -42,96 +27,6 @@ export default {
     return new Response("Not found", { status: 404 });
   },
 };
-
-// Google OAuth handler
-async function handleGoogleCallback(request: Request, env: any): Promise<Response> {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-
-  if (!code) {
-    return new Response("Missing authorization code", { status: 400 });
-  }
-
-  try {
-    // Exchange code for tokens
-    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code: code,
-        client_id: env.GOOGLE_CLIENT_ID,
-        client_secret: env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: env.GOOGLE_REDIRECT_URI,
-        grant_type: "authorization_code",
-      }),
-    });
-
-    const tokens = await tokenResponse.json() as any;
-
-    if (!tokens.access_token) {
-      throw new Error("Failed to get access token");
-    }
-
-    // Get user info
-    const userResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
-
-    const userInfo = await userResponse.json() as any;
-
-    // Create session token
-    const sessionToken = crypto.randomUUID();
-    const userData = {
-      id: userInfo.id,
-      email: userInfo.email,
-      name: userInfo.name,
-      picture: userInfo.picture,
-    };
-
-    // Return HTML that stores session and redirects
-    return new Response(
-      `<!DOCTYPE html>
-      <html>
-      <head><title>Login Success</title></head>
-      <body>
-        <script>
-          localStorage.setItem('session', '${sessionToken}');
-          localStorage.setItem('user', JSON.stringify(${JSON.stringify(userData)}));
-          window.location.href = '/';
-        </script>
-      </body>
-      </html>`,
-      { headers: { "Content-Type": "text/html" } }
-    );
-  } catch (error) {
-    return new Response("Authentication failed: " + (error as Error).message, { status: 500 });
-  }
-}
-
-function getUserInfo(request: Request): Response {
-  // In a real app, validate session token here
-  return new Response(JSON.stringify({ authenticated: false }), {
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-function logout(): Response {
-  return new Response(
-    `<!DOCTYPE html>
-    <html>
-    <head><title>Logout</title></head>
-    <body>
-      <script>
-        localStorage.removeItem('session');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userId');
-        window.location.href = '/';
-      </script>
-    </body>
-    </html>`,
-    { headers: { "Content-Type": "text/html" } }
-  );
-}
 
 const TEST_HTML = `<!DOCTYPE html>
 <html>
@@ -283,80 +178,6 @@ const MAIN_HTML = `<!DOCTYPE html>
       border-top: 1px solid #4d4d4f;
       font-size: 12px;
       color: #8e8ea0;
-    }
-    
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      background: linear-gradient(135deg, #2a2b32 0%, #343541 100%);
-      border-radius: 8px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .user-profile:hover {
-      background: linear-gradient(135deg, #343541 0%, #3d3e4f 100%);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    
-    .user-profile img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid #10a37f;
-    }
-    
-    .user-info {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .user-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #ececf1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .user-email {
-      font-size: 11px;
-      color: #8e8ea0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .login-btn {
-      width: 100%;
-      padding: 12px 16px;
-      background: white;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.3s ease;
-      color: #3c4043;
-      margin-bottom: 12px;
-    }
-    
-    .login-btn:hover {
-      background: #f8f9fa;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    
-    .login-btn img {
-      width: 18px;
-      height: 18px;
     }
     
     .auto-read-toggle {
@@ -877,7 +698,6 @@ const MAIN_HTML = `<!DOCTYPE html>
       <!-- Chat history items will go here -->
     </div>
     <div class="sidebar-footer">
-      <div id="authSection"></div>
       <div class="auto-read-toggle" onclick="toggleAutoRead()">
         <input type="checkbox" id="autoReadCheckbox" onclick="event.stopPropagation()">
         <label for="autoReadCheckbox">🔊 Auto-read responses</label>
@@ -962,7 +782,6 @@ const MAIN_HTML = `<!DOCTYPE html>
     var sendBtn = document.getElementById('sendBtn');
     var voiceBtn = document.getElementById('voiceBtn');
     var statusDiv = document.getElementById('status');
-    var authSection = document.getElementById('authSection');
     var ws = null;
     var messageId = 0;
     var hasMessages = false;
@@ -974,69 +793,14 @@ const MAIN_HTML = `<!DOCTYPE html>
     var autoRead = false;
     var currentSpeech = null;
     var userId = null;
-    var currentUser = null;
-    
-    // Google OAuth Config - YOU NEED TO SET THESE
-    var GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
-    var REDIRECT_URI = window.location.origin + '/auth/callback';
 
-    // Check for existing user session
-    var storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        currentUser = JSON.parse(storedUser);
-        userId = 'google_' + currentUser.id;
-      } catch (e) {
-        localStorage.removeItem('user');
-      }
-    }
-
-    // Fallback to anonymous user
+    // Get or create user ID
+    userId = localStorage.getItem('userId');
     if (!userId) {
-      userId = localStorage.getItem('userId');
-      if (!userId) {
-        userId = 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('userId', userId);
-      }
+      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', userId);
     }
-    
     console.log('User ID:', userId);
-    
-    // Render auth section
-    function renderAuth() {
-      if (currentUser) {
-        authSection.innerHTML = '<div class="user-profile" onclick="showUserMenu()">' +
-          '<img src="' + currentUser.picture + '" alt="' + currentUser.name + '">' +
-          '<div class="user-info">' +
-          '<div class="user-name">' + currentUser.name + '</div>' +
-          '<div class="user-email">' + currentUser.email + '</div>' +
-          '</div>' +
-          '</div>';
-      } else {
-        authSection.innerHTML = '<button class="login-btn" onclick="loginWithGoogle()">' +
-          '<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707 0-.593.102-1.17.282-1.709V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.335z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>' +
-          'Sign in with Google' +
-          '</button>';
-      }
-    }
-    
-    function loginWithGoogle() {
-      var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'client_id=' + encodeURIComponent(GOOGLE_CLIENT_ID) +
-        '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
-        '&response_type=code' +
-        '&scope=' + encodeURIComponent('openid email profile') +
-        '&access_type=online';
-      window.location.href = authUrl;
-    }
-    
-    function showUserMenu() {
-      if (confirm('Do you want to sign out?')) {
-        window.location.href = '/auth/logout';
-      }
-    }
-    
-    renderAuth();
 
     // Load auto-read preference
     if (localStorage.getItem('autoRead') === 'true') {
