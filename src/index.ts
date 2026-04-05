@@ -310,6 +310,78 @@ const MAIN_HTML = `<!DOCTYPE html>
       position: relative;
     }
     
+    .attachments-preview {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .attachment-item {
+      position: relative;
+      background: #40414f;
+      border: 1px solid #565869;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 200px;
+    }
+    
+    .attachment-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    
+    .attachment-item .file-icon {
+      width: 40px;
+      height: 40px;
+      background: #565869;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .attachment-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .attachment-name {
+      font-size: 12px;
+      color: #ececf1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .attachment-size {
+      font-size: 10px;
+      color: #8e8ea0;
+    }
+    
+    .remove-attachment {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border: 2px solid #343541;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+    }
+    
     .input-container {
       background: #40414f;
       border-radius: 12px;
@@ -317,11 +389,42 @@ const MAIN_HTML = `<!DOCTYPE html>
       display: flex;
       align-items: flex-end;
       padding: 12px 16px;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s;
     }
     
     .input-container:focus-within {
       border-color: #8e8ea0;
+    }
+    
+    .input-container.drag-over {
+      border-color: #19c37d;
+      background: #4a4b56;
+    }
+    
+    .attach-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      margin-right: 8px;
+      color: #8e8ea0;
+    }
+    
+    .attach-btn:hover {
+      background: #565869;
+    }
+    
+    .attach-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
     }
     
     textarea {
@@ -370,6 +473,10 @@ const MAIN_HTML = `<!DOCTYPE html>
       width: 16px;
       height: 16px;
       fill: white;
+    }
+    
+    .file-input {
+      display: none;
     }
     
     /* Typing Indicator */
@@ -435,7 +542,8 @@ const MAIN_HTML = `<!DOCTYPE html>
       <!-- Chat history items will go here -->
     </div>
     <div class="sidebar-footer">
-      Powered by Cloudflare Workers AI
+      Powered by Cloudflare Workers AI<br>
+      <small style="opacity: 0.7;">Llama 3.3 70B + LLaVA Vision</small>
     </div>
   </div>
 
@@ -465,13 +573,28 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     <div class="input-area">
       <div class="input-wrapper">
-        <div class="input-container">
+        <div class="attachments-preview" id="attachmentsPreview"></div>
+        <div class="input-container" id="inputContainer">
+          <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach file or image">
+            <svg viewBox="0 0 24 24">
+              <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+            </svg>
+          </button>
+          <input 
+            type="file" 
+            id="fileInput" 
+            class="file-input" 
+            accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
+            multiple
+            onchange="handleFileSelect(event)"
+          />
           <textarea 
             id="input" 
-            placeholder="Send a message..." 
+            placeholder="Send a message... (Paste images with Ctrl+V)" 
             rows="1"
             onkeydown="handleKeyDown(event)"
             oninput="autoResize(this)"
+            onpaste="handlePaste(event)"
           ></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendMessage()">
             <svg viewBox="0 0 24 24">
@@ -487,6 +610,8 @@ const MAIN_HTML = `<!DOCTYPE html>
     var messagesContainer = document.getElementById('messagesContainer');
     var emptyState = document.getElementById('emptyState');
     var chatHistory = document.getElementById('chatHistory');
+    var attachmentsPreview = document.getElementById('attachmentsPreview');
+    var inputContainer = document.getElementById('inputContainer');
     var input = document.getElementById('input');
     var sendBtn = document.getElementById('sendBtn');
     var statusDiv = document.getElementById('status');
@@ -495,6 +620,28 @@ const MAIN_HTML = `<!DOCTYPE html>
     var hasMessages = false;
     var currentChatId = null;
     var chats = [];
+    var attachedFiles = [];
+
+    // Setup drag and drop
+    inputContainer.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      inputContainer.classList.add('drag-over');
+    });
+
+    inputContainer.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      inputContainer.classList.remove('drag-over');
+    });
+
+    inputContainer.addEventListener('drop', function(e) {
+      e.preventDefault();
+      inputContainer.classList.remove('drag-over');
+      
+      var files = e.dataTransfer.files;
+      if (files.length > 0) {
+        addFilesToAttachments(files);
+      }
+    });
 
     function connect() {
       console.log('Connecting...');
@@ -540,6 +687,100 @@ const MAIN_HTML = `<!DOCTYPE html>
       };
     }
 
+    function handleFileSelect(event) {
+      var files = event.target.files;
+      addFilesToAttachments(files);
+      event.target.value = '';
+    }
+
+    function handlePaste(event) {
+      var items = event.clipboardData.items;
+      var files = [];
+      
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        
+        if (item.kind === 'file') {
+          var file = item.getAsFile();
+          if (file) {
+            files.push(file);
+          }
+        }
+      }
+      
+      if (files.length > 0) {
+        event.preventDefault();
+        addFilesToAttachments(files);
+      }
+    }
+
+    function addFilesToAttachments(files) {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        if (file.size > 10 * 1024 * 1024) {
+          alert('File ' + file.name + ' is too large. Max size is 10MB.');
+          continue;
+        }
+        attachedFiles.push(file);
+      }
+      renderAttachments();
+    }
+
+    function renderAttachments() {
+      attachmentsPreview.innerHTML = '';
+      attachedFiles.forEach(function(file, index) {
+        var item = document.createElement('div');
+        item.className = 'attachment-item';
+        
+        if (file.type.startsWith('image/')) {
+          var img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          item.appendChild(img);
+        } else {
+          var icon = document.createElement('div');
+          icon.className = 'file-icon';
+          icon.textContent = '📄';
+          item.appendChild(icon);
+        }
+        
+        var info = document.createElement('div');
+        info.className = 'attachment-info';
+        
+        var name = document.createElement('div');
+        name.className = 'attachment-name';
+        name.textContent = file.name;
+        
+        var size = document.createElement('div');
+        size.className = 'attachment-size';
+        size.textContent = formatFileSize(file.size);
+        
+        info.appendChild(name);
+        info.appendChild(size);
+        item.appendChild(info);
+        
+        var remove = document.createElement('div');
+        remove.className = 'remove-attachment';
+        remove.textContent = '×';
+        remove.onclick = function() {
+          removeAttachment(index);
+        };
+        item.appendChild(remove);
+        
+        attachmentsPreview.appendChild(item);
+      });
+    }
+
+    function removeAttachment(index) {
+      attachedFiles.splice(index, 1);
+      renderAttachments();
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
     function renderChatHistory() {
       chatHistory.innerHTML = '';
       chats.forEach(function(chat) {
@@ -564,11 +805,11 @@ const MAIN_HTML = `<!DOCTYPE html>
       hasMessages = true;
       
       chat.messages.forEach(function(msg) {
-        addMessage(msg.role, msg.content);
+        addMessage(msg.role, msg.content, msg.attachments);
       });
     }
 
-    function addMessage(role, content) {
+    function addMessage(role, content, attachments) {
       if (!hasMessages) {
         emptyState.style.display = 'none';
         hasMessages = true;
@@ -584,12 +825,34 @@ const MAIN_HTML = `<!DOCTYPE html>
       avatar.className = 'avatar ' + role;
       avatar.textContent = role === 'user' ? '👤' : '🤖';
       
+      var textContainer = document.createElement('div');
+      textContainer.className = 'message-text';
+      
+      if (attachments && attachments.length > 0) {
+        attachments.forEach(function(att) {
+          if (att.type === 'image') {
+            var img = document.createElement('img');
+            img.src = att.data;
+            img.style.maxWidth = '300px';
+            img.style.borderRadius = '8px';
+            img.style.marginBottom = '8px';
+            textContainer.appendChild(img);
+          } else {
+            var fileDiv = document.createElement('div');
+            fileDiv.textContent = '📎 ' + att.name + ' (' + att.size + ')';
+            fileDiv.style.marginBottom = '8px';
+            fileDiv.style.color = '#8e8ea0';
+            textContainer.appendChild(fileDiv);
+          }
+        });
+      }
+      
       var text = document.createElement('div');
-      text.className = 'message-text';
       text.textContent = content;
+      textContainer.appendChild(text);
       
       messageContent.appendChild(avatar);
-      messageContent.appendChild(text);
+      messageContent.appendChild(textContainer);
       wrapper.appendChild(messageContent);
       
       messagesContainer.appendChild(wrapper);
@@ -625,27 +888,49 @@ const MAIN_HTML = `<!DOCTYPE html>
       if (typing) typing.remove();
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       var text = input.value.trim();
-      if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+      if ((!text && attachedFiles.length === 0) || !ws || ws.readyState !== WebSocket.OPEN) return;
       
-      // Create new chat if needed
       if (!currentChatId) {
         currentChatId = Date.now().toString();
       }
       
-      addMessage('user', text);
+      var attachmentsData = [];
+      
+      for (var i = 0; i < attachedFiles.length; i++) {
+        var file = attachedFiles[i];
+        var reader = new FileReader();
+        
+        await new Promise(function(resolve) {
+          reader.onload = function(e) {
+            attachmentsData.push({
+              name: file.name,
+              type: file.type.startsWith('image/') ? 'image' : 'file',
+              size: formatFileSize(file.size),
+              data: e.target.result
+            });
+            resolve();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      
+      addMessage('user', text || 'Sent ' + attachedFiles.length + ' file(s)', attachmentsData);
       showTyping();
       
       ws.send(JSON.stringify({ 
         type: 'chat', 
         id: ++messageId, 
         content: text,
-        chatId: currentChatId
+        chatId: currentChatId,
+        attachments: attachmentsData
       }));
       
       input.value = '';
       input.style.height = 'auto';
+      attachedFiles = [];
+      renderAttachments();
       sendBtn.disabled = true;
       setTimeout(function() { sendBtn.disabled = false; }, 1000);
     }
@@ -660,6 +945,8 @@ const MAIN_HTML = `<!DOCTYPE html>
       emptyState.style.display = 'flex';
       hasMessages = false;
       currentChatId = null;
+      attachedFiles = [];
+      renderAttachments();
     }
 
     function handleKeyDown(e) {

@@ -38,7 +38,7 @@ export class TaskAgent {
         const data = JSON.parse(event.data as string);
         
         if (data.type === "chat") {
-          await this.handleChat(data.content, data.chatId, server);
+          await this.handleChat(data.content, data.chatId, server, data.attachments);
         } else if (data.type === "newChat") {
           const chatId = Date.now().toString();
           server.send(JSON.stringify({
@@ -62,7 +62,7 @@ export class TaskAgent {
     });
   }
 
-  async handleChat(message: string, chatId: string, ws: WebSocket) {
+  async handleChat(message: string, chatId: string, ws: WebSocket, attachments?: any[]) {
     try {
       // Get or create chat
       const chats = (await this.state.storage.get("chats")) as any[] || [];
@@ -71,38 +71,100 @@ export class TaskAgent {
       if (!chat) {
         chat = {
           id: chatId,
-          title: message.substring(0, 50),
+          title: message.substring(0, 50) || 'File upload',
           messages: [],
           createdAt: new Date().toISOString()
         };
         chats.unshift(chat);
       }
 
-      // Add user message
-      chat.messages.push({
+      // Add user message with attachments
+      const userMessage: any = {
         role: "user",
         content: message,
         timestamp: new Date().toISOString()
-      });
+      };
+      
+      if (attachments && attachments.length > 0) {
+        userMessage.attachments = attachments;
+      }
+      
+      chat.messages.push(userMessage);
 
-      // Build conversation history for AI
-      const aiMessages = [
-        {
-          role: "system",
-          content: "You are a helpful AI assistant. Be friendly and conversational."
-        },
-        ...chat.messages.map((m: any) => ({
-          role: m.role,
-          content: m.content
-        }))
-      ];
+      let aiMessage = "";
+      
+      // Check if there are images to analyze
+      const images = attachments?.filter((a: any) => a.type === 'image') || [];
+      
+      if (images.length > 0) {
+        // Use vision model for image analysis
+        try {
+          for (const image of images) {
+            // Extract base64 data from data URL
+            const base64Data = image.data.split(',')[1];
+            
+            const visionResponse = await this.env.AI.run("@cf/llava-hf/llava-1.5-7b-hf", {
+              image: Array.from(Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))),
+              prompt: message || "What do you see in this image? Describe it in detail.",
+              max_tokens: 512
+            });
+            
+            aiMessage += visionResponse.description || "I can see an image, but I'm having trouble analyzing it.";
+            aiMessage += "\n\n";
+          }
+          
+          // If there are multiple images or additional text, add context
+          if (images.length > 1) {
+            aiMessage = `I analyzed ${images.length} images:\n\n` + aiMessage;
+          }
+          
+        } catch (visionError) {
+          console.error("Vision error:", visionError);
+          aiMessage = "I can see you've shared an image, but I'm having trouble analyzing it right now. ";
+        }
+      }
+      
+      // If no images or need additional text response, use text model
+      if (images.length === 0 || message) {
+        // Build conversation history for AI
+        let contextMessage = message;
+        
+        // Add context about non-image attachments
+        const files = attachments?.filter((a: any) => a.type !== 'image') || [];
+        if (files.length > 0) {
+          const fileNames = files.map((a: any) => a.name).join(', ');
+          contextMessage += `\n[User attached file(s): ${fileNames}]`;
+        }
 
-      // Call Workers AI
-      const response = await this.env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
-        messages: aiMessages
-      });
+        const aiMessages = [
+          {
+            role: "system",
+            content: "You are a helpful AI assistant. Be friendly and conversational. When users share files, acknowledge them and offer to help."
+          },
+          ...chat.messages.slice(0, -1).map((m: any) => ({
+            role: m.role,
+            content: m.content
+          })),
+          {
+            role: "user",
+            content: contextMessage
+          }
+        ];
 
-      const aiMessage = response.response || "I am here to help!";
+        // Call Workers AI for text using Llama 3.3 70B
+        const response = await this.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+          messages: aiMessages
+        });
+
+        const textResponse = response.response || "I am here to help!";
+        
+        // Combine vision and text responses
+        if (images.length > 0 && message) {
+          aiMessage += "\n" + textResponse;
+        } else if (images.length === 0) {
+          aiMessage = textResponse;
+        }
+      }
       
       // Add AI response to chat
       chat.messages.push({
@@ -113,7 +175,7 @@ export class TaskAgent {
 
       // Update chat title if it's the first exchange
       if (chat.messages.length === 2) {
-        chat.title = message.substring(0, 50);
+        chat.title = message.substring(0, 50) || 'Image analysis';
       }
 
       // Save to storage
