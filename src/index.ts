@@ -244,6 +244,53 @@ const MAIN_HTML = `<!DOCTYPE html>
       line-height: 1.7;
       font-size: 16px;
       padding-top: 4px;
+      position: relative;
+    }
+    
+    .speak-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      background: #565869;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .message-wrapper:hover .speak-btn {
+      display: flex;
+    }
+    
+    .speak-btn:hover {
+      opacity: 1;
+    }
+    
+    .speak-btn.speaking {
+      background: #19c37d;
+      opacity: 1;
+      animation: pulse-green 1s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-green {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+    
+    .speak-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: white;
     }
     
     /* Empty State */
@@ -427,6 +474,47 @@ const MAIN_HTML = `<!DOCTYPE html>
       fill: currentColor;
     }
     
+    .voice-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      margin-right: 8px;
+      color: #8e8ea0;
+    }
+    
+    .voice-btn:hover {
+      background: #565869;
+    }
+    
+    .voice-btn.recording {
+      background: #ef4444;
+      color: white;
+      animation: pulse-red 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-red {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+    
+    .voice-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+    
     textarea {
       flex: 1;
       background: transparent;
@@ -580,6 +668,12 @@ const MAIN_HTML = `<!DOCTYPE html>
               <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
             </svg>
           </button>
+          <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice input (click to speak)">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
           <input 
             type="file" 
             id="fileInput" 
@@ -590,7 +684,7 @@ const MAIN_HTML = `<!DOCTYPE html>
           />
           <textarea 
             id="input" 
-            placeholder="Send a message... (Paste images with Ctrl+V)" 
+            placeholder="Send a message... (Paste images with Ctrl+V or click mic to speak)" 
             rows="1"
             onkeydown="handleKeyDown(event)"
             oninput="autoResize(this)"
@@ -614,6 +708,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     var inputContainer = document.getElementById('inputContainer');
     var input = document.getElementById('input');
     var sendBtn = document.getElementById('sendBtn');
+    var voiceBtn = document.getElementById('voiceBtn');
     var statusDiv = document.getElementById('status');
     var ws = null;
     var messageId = 0;
@@ -621,6 +716,69 @@ const MAIN_HTML = `<!DOCTYPE html>
     var currentChatId = null;
     var chats = [];
     var attachedFiles = [];
+    var recognition = null;
+    var isRecording = false;
+
+    // Setup speech recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = function() {
+        isRecording = true;
+        voiceBtn.classList.add('recording');
+        statusDiv.textContent = 'Listening... Speak now';
+        statusDiv.className = 'status-bar';
+        statusDiv.style.background = '#ef4444';
+        statusDiv.style.color = 'white';
+      };
+
+      recognition.onresult = function(event) {
+        var transcript = '';
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        input.value = transcript;
+        autoResize(input);
+      };
+
+      recognition.onend = function() {
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        statusDiv.textContent = 'Connected';
+        statusDiv.className = 'status-bar connected';
+      };
+
+      recognition.onerror = function(event) {
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        statusDiv.textContent = 'Voice error: ' + event.error;
+        statusDiv.className = 'status-bar';
+        setTimeout(function() {
+          statusDiv.textContent = 'Connected';
+          statusDiv.className = 'status-bar connected';
+        }, 3000);
+      };
+    } else {
+      voiceBtn.style.display = 'none';
+      console.log('Speech recognition not supported');
+    }
+
+    function toggleVoiceInput() {
+      if (!recognition) {
+        alert('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
 
     // Setup drag and drop
     inputContainer.addEventListener('dragover', function(e) {
@@ -851,12 +1009,49 @@ const MAIN_HTML = `<!DOCTYPE html>
       text.textContent = content;
       textContainer.appendChild(text);
       
+      // Add speak button for assistant messages
+      if (role === 'assistant' && 'speechSynthesis' in window) {
+        var speakBtn = document.createElement('button');
+        speakBtn.className = 'speak-btn';
+        speakBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+        speakBtn.title = 'Read aloud';
+        speakBtn.onclick = function() {
+          speakText(content, speakBtn);
+        };
+        textContainer.appendChild(speakBtn);
+      }
+      
       messageContent.appendChild(avatar);
       messageContent.appendChild(textContainer);
       wrapper.appendChild(messageContent);
       
       messagesContainer.appendChild(wrapper);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function speakText(text, button) {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        button.classList.remove('speaking');
+        return;
+      }
+
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      button.classList.add('speaking');
+      
+      utterance.onend = function() {
+        button.classList.remove('speaking');
+      };
+      
+      utterance.onerror = function() {
+        button.classList.remove('speaking');
+      };
+      
+      window.speechSynthesis.speak(utterance);
     }
 
     function showTyping() {
