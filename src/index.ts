@@ -91,6 +91,23 @@ const MAIN_HTML = `<!DOCTYPE html>
       --accent: #10B981;
       --text-main: #0F172A;
       --text-secondary: #64748B;
+      --border-color: #E2E8F0;
+      --hover-bg: #EFF6FF;
+      --shadow: rgba(0,0,0,0.05);
+    }
+    
+    [data-theme="dark"] {
+      --bg-main: #0F172A;
+      --bg-secondary: #1E293B;
+      --card-bg: #111827;
+      --primary: #8B5CF6;
+      --primary-hover: #7C3AED;
+      --accent: #22C55E;
+      --text-main: #FFFFFF;
+      --text-secondary: #94A3B8;
+      --border-color: rgba(139, 92, 246, 0.2);
+      --hover-bg: rgba(139, 92, 246, 0.1);
+      --shadow: rgba(0,0,0,0.4);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -103,6 +120,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       display: flex;
       overflow: hidden;
       margin: 0;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     
     /* Sidebar */
@@ -111,12 +129,36 @@ const MAIN_HTML = `<!DOCTYPE html>
       background: var(--bg-secondary);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #E2E8F0;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px var(--shadow);
+      transition: background 0.3s ease;
     }
     
     .sidebar-header {
       padding: 12px;
+    }
+    
+    .theme-toggle {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+    }
+    
+    .theme-toggle:hover {
+      background: var(--hover-bg);
+      border-color: var(--primary);
     }
     
     .new-chat-btn {
@@ -167,7 +209,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       text-overflow: ellipsis;
       position: relative;
       background: var(--bg-main);
-      border: 1px solid #E2E8F0;
+      border: 1px solid var(--border-color);
     }
     
     .chat-item::before {
@@ -177,7 +219,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .chat-item:hover {
-      background: #EFF6FF;
+      background: var(--hover-bg);
       padding-left: 18px;
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
       border-color: var(--primary);
@@ -193,7 +235,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .sidebar-footer {
       padding: 12px;
-      border-top: 1px solid #E2E8F0;
+      border-top: 1px solid var(--border-color);
       font-size: 12px;
       color: var(--text-secondary);
     }
@@ -208,11 +250,11 @@ const MAIN_HTML = `<!DOCTYPE html>
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
-      border: 1px solid #E2E8F0;
+      border: 1px solid var(--border-color);
     }
     
     .auto-read-toggle:hover {
-      background: #EFF6FF;
+      background: var(--hover-bg);
       border-color: var(--primary);
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
     }
@@ -245,7 +287,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       text-align: center;
       font-size: 13px;
       font-weight: 500;
-      border-bottom: 1px solid #E2E8F0;
+      border-bottom: 1px solid var(--border-color);
       transition: all 0.3s ease;
       color: var(--text-secondary);
     }
@@ -274,18 +316,19 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .messages-container::-webkit-scrollbar-thumb {
-      background: #CBD5E1;
+      background: var(--text-secondary);
       border-radius: 4px;
     }
     
     .messages-container::-webkit-scrollbar-thumb:hover {
-      background: #94A3B8;
+      background: var(--text-main);
     }
     
     .message-wrapper {
       width: 100%;
-      border-bottom: 1px solid #E2E8F0;
+      border-bottom: 1px solid var(--border-color);
       padding: 24px 0;
+      transition: background 0.3s ease;
     }
     
     .message-wrapper.user {
@@ -340,7 +383,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       right: 4px;
       width: 28px;
       height: 28px;
-      background: #F1F5F9;
+      background: var(--hover-bg);
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -353,7 +396,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .speak-btn:hover {
       opacity: 1;
-      background: #E2E8F0;
+      background: var(--border-color);
     }
     
     .speak-btn.speaking {
@@ -410,12 +453,12 @@ const MAIN_HTML = `<!DOCTYPE html>
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: left;
-      border: 2px solid #E2E8F0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 2px solid var(--border-color);
+      box-shadow: 0 2px 8px var(--shadow);
     }
     
     .example-card:hover {
-      background: #EFF6FF;
+      background: var(--hover-bg);
       border-color: var(--primary);
       transform: translateY(-4px);
       box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
@@ -437,7 +480,8 @@ const MAIN_HTML = `<!DOCTYPE html>
     .input-area {
       padding: 20px;
       background: var(--bg-secondary);
-      border-top: 1px solid #E2E8F0;
+      border-top: 1px solid var(--border-color);
+      transition: background 0.3s ease;
     }
     
     .input-wrapper {
@@ -456,7 +500,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     .attachment-item {
       position: relative;
       background: var(--bg-main);
-      border: 1px solid #E2E8F0;
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       padding: 8px;
       display: flex;
@@ -475,7 +519,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     .attachment-item .file-icon {
       width: 40px;
       height: 40px;
-      background: #EFF6FF;
+      background: var(--hover-bg);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -521,11 +565,11 @@ const MAIN_HTML = `<!DOCTYPE html>
     .input-container {
       background: var(--card-bg);
       border-radius: 16px;
-      border: 2px solid #E2E8F0;
+      border: 2px solid var(--border-color);
       display: flex;
       align-items: flex-end;
       padding: 12px 16px;
-      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+      transition: all 0.3s ease;
     }
     
     .input-container:focus-within {
@@ -556,7 +600,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .attach-btn:hover {
-      background: #EFF6FF;
+      background: var(--hover-bg);
       color: var(--primary);
     }
     
@@ -583,7 +627,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .voice-btn:hover {
-      background: #EFF6FF;
+      background: var(--hover-bg);
       color: var(--primary);
     }
     
@@ -721,6 +765,10 @@ const MAIN_HTML = `<!DOCTYPE html>
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark Mode</span>
+      </button>
       <button class="new-chat-btn" onclick="newChat()">
         <span>+</span>
         <span>New chat</span>
@@ -833,6 +881,30 @@ const MAIN_HTML = `<!DOCTYPE html>
       localStorage.setItem('userId', userId);
     }
     console.log('User ID:', userId);
+    
+    // Theme management
+    var currentTheme = localStorage.getItem('theme') || 'light';
+    
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+        document.getElementById('themeText').textContent = 'Light Mode';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('themeIcon').textContent = '🌙';
+        document.getElementById('themeText').textContent = 'Dark Mode';
+      }
+    }
+    
+    function toggleTheme() {
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', currentTheme);
+      applyTheme(currentTheme);
+    }
+    
+    // Apply saved theme on load
+    applyTheme(currentTheme);
 
     // Load auto-read preference
     if (localStorage.getItem('autoRead') === 'true') {
