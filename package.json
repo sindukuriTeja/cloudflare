@@ -1,0 +1,20 @@
+{
+  "name": "cf_ai_task_assistant",
+  "version": "1.0.0",
+  "description": "AI-powered task assistant built on Cloudflare with LLM, workflow coordination, user input, and memory",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev",
+    "build": "tsc",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.86.0",
+    "typescript": "^5.6.3"
+  }
+}

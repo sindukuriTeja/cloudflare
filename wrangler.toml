@@ -1,0 +1,17 @@
+name = "cf-ai-task-assistant"
+main = "src/index.ts"
+compatibility_date = "2024-11-27"
+
+# Workers AI binding
+[ai]
+binding = "AI"
+
+# Durable Objects configuration
+[[durable_objects.bindings]]
+name = "TASK_AGENT"
+class_name = "TaskAgent"
+
+# Migrations for Durable Objects
+[[migrations]]
+tag = "v1"
+new_classes = ["TaskAgent"]
