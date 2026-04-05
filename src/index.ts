@@ -82,12 +82,23 @@ const MAIN_HTML = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Assistant</title>
   <style>
+    :root {
+      --bg-main: #0F172A;
+      --bg-secondary: #1E293B;
+      --card-bg: #111827;
+      --primary: #8B5CF6;
+      --primary-hover: #7C3AED;
+      --accent: #22C55E;
+      --text-main: #FFFFFF;
+      --text-secondary: #94A3B8;
+    }
+    
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: #f5f5f5;
+      background: var(--bg-main);
+      color: var(--text-main);
       height: 100vh;
       display: flex;
       overflow: hidden;
@@ -97,10 +108,10 @@ const MAIN_HTML = `<!DOCTYPE html>
     /* Sidebar */
     .sidebar {
       width: 260px;
-      background: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      background: var(--bg-secondary);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(212, 175, 55, 0.3);
+      border-right: 1px solid rgba(139, 92, 246, 0.2);
       box-shadow: 2px 0 20px rgba(0,0,0,0.4);
     }
     
@@ -111,10 +122,10 @@ const MAIN_HTML = `<!DOCTYPE html>
     .new-chat-btn {
       width: 100%;
       padding: 14px 16px;
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      background: var(--primary);
       border: none;
       border-radius: 12px;
-      color: #0f2027;
+      color: var(--text-main);
       cursor: pointer;
       font-size: 14px;
       font-weight: 700;
@@ -123,14 +134,14 @@ const MAIN_HTML = `<!DOCTYPE html>
       justify-content: center;
       gap: 10px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
       letter-spacing: 0.5px;
     }
     
     .new-chat-btn:hover {
-      background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+      background: var(--primary-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
     }
     
     .new-chat-btn:active {
@@ -149,14 +160,14 @@ const MAIN_HTML = `<!DOCTYPE html>
       cursor: pointer;
       font-size: 14px;
       margin-bottom: 6px;
-      color: #f5f5f5;
+      color: var(--text-main);
       transition: all 0.2s ease;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       position: relative;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(212, 175, 55, 0.1);
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid rgba(139, 92, 246, 0.1);
     }
     
     .chat-item::before {
@@ -166,25 +177,25 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .chat-item:hover {
-      background: rgba(212, 175, 55, 0.15);
+      background: rgba(139, 92, 246, 0.15);
       padding-left: 18px;
-      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
-      border-color: rgba(212, 175, 55, 0.4);
+      box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3);
+      border-color: var(--primary);
     }
     
     .chat-item.active {
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-      color: #0f2027;
+      background: var(--primary);
+      color: var(--text-main);
       font-weight: 700;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.5);
-      border-color: #d4af37;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+      border-color: var(--primary);
     }
     
     .sidebar-footer {
       padding: 12px;
-      border-top: 1px solid rgba(212, 175, 55, 0.3);
+      border-top: 1px solid rgba(139, 92, 246, 0.2);
       font-size: 12px;
-      color: rgba(245, 245, 245, 0.7);
+      color: var(--text-secondary);
     }
     
     .auto-read-toggle {
@@ -193,17 +204,17 @@ const MAIN_HTML = `<!DOCTYPE html>
       gap: 10px;
       padding: 10px 14px;
       margin-bottom: 12px;
-      background: rgba(212, 175, 55, 0.1);
+      background: var(--card-bg);
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.2);
     }
     
     .auto-read-toggle:hover {
-      background: rgba(212, 175, 55, 0.2);
-      border-color: #d4af37;
-      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3);
     }
     
     .auto-read-toggle input[type="checkbox"] {
@@ -215,7 +226,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     .auto-read-toggle label {
       cursor: pointer;
       font-size: 13px;
-      color: rgba(255,255,255,0.9);
+      color: var(--text-main);
       flex: 1;
     }
     
@@ -230,20 +241,20 @@ const MAIN_HTML = `<!DOCTYPE html>
     /* Status Bar */
     .status-bar {
       padding: 12px 20px;
-      background: rgba(15, 32, 39, 0.8);
+      background: var(--bg-secondary);
       text-align: center;
       font-size: 13px;
       font-weight: 500;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.2);
       transition: all 0.3s ease;
-      color: rgba(245, 245, 245, 0.8);
+      color: var(--text-secondary);
     }
     
     .status-bar.connected {
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-      color: #0f2027;
+      background: var(--accent);
+      color: var(--text-main);
       font-weight: 700;
-      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 2px 12px rgba(34, 197, 94, 0.4);
     }
     
     /* Messages Area */
@@ -263,26 +274,26 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .messages-container::-webkit-scrollbar-thumb {
-      background: rgba(212, 175, 55, 0.5);
+      background: var(--primary);
       border-radius: 4px;
     }
     
     .messages-container::-webkit-scrollbar-thumb:hover {
-      background: rgba(212, 175, 55, 0.7);
+      background: var(--primary-hover);
     }
     
     .message-wrapper {
       width: 100%;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
       padding: 24px 0;
     }
     
     .message-wrapper.user {
-      background: rgba(30, 60, 114, 0.3);
+      background: var(--bg-secondary);
     }
     
     .message-wrapper.assistant {
-      background: rgba(15, 32, 39, 0.4);
+      background: var(--card-bg);
     }
     
     .message-content {
@@ -306,13 +317,13 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .avatar.user {
-      background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
-      border: 2px solid #d4af37;
+      background: var(--primary);
+      border: 2px solid var(--primary-hover);
     }
     
     .avatar.assistant {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      border: 2px solid #d4af37;
+      background: var(--accent);
+      border: 2px solid #16a34a;
     }
     
     .message-text {
@@ -329,7 +340,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       right: 4px;
       width: 28px;
       height: 28px;
-      background: rgba(212, 175, 55, 0.2);
+      background: rgba(139, 92, 246, 0.2);
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -342,11 +353,11 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .speak-btn:hover {
       opacity: 1;
-      background: rgba(212, 175, 55, 0.4);
+      background: rgba(139, 92, 246, 0.4);
     }
     
     .speak-btn.speaking {
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      background: var(--accent);
       opacity: 1;
       animation: pulse-green 1s ease-in-out infinite;
     }
@@ -393,42 +404,42 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .example-card {
-      background: rgba(212, 175, 55, 0.1);
+      background: var(--card-bg);
       padding: 20px;
       border-radius: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: left;
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      border: 2px solid rgba(139, 92, 246, 0.3);
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       backdrop-filter: blur(10px);
     }
     
     .example-card:hover {
-      background: rgba(212, 175, 55, 0.2);
-      border-color: #d4af37;
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--primary);
       transform: translateY(-4px);
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
     }
     
     .example-card h3 {
       font-size: 14px;
       margin-bottom: 8px;
-      color: #f4d03f;
+      color: var(--primary);
       font-weight: 700;
     }
     
     .example-card p {
       font-size: 13px;
-      color: rgba(245, 245, 245, 0.9);
+      color: var(--text-secondary);
     }
     
     /* Input Area */
     .input-area {
       padding: 20px;
-      background: rgba(15, 32, 39, 0.6);
+      background: var(--bg-secondary);
       backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      border-top: 1px solid rgba(139, 92, 246, 0.2);
     }
     
     .input-wrapper {
@@ -446,8 +457,8 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-item {
       position: relative;
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: var(--card-bg);
+      border: 1px solid rgba(139, 92, 246, 0.3);
       border-radius: 10px;
       padding: 8px;
       display: flex;
@@ -466,7 +477,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     .attachment-item .file-icon {
       width: 40px;
       height: 40px;
-      background: rgba(102, 126, 234, 0.3);
+      background: rgba(139, 92, 246, 0.3);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -481,7 +492,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-name {
       font-size: 12px;
-      color: rgba(255,255,255,0.9);
+      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -489,7 +500,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-size {
       font-size: 10px;
-      color: rgba(255,255,255,0.6);
+      color: var(--text-secondary);
     }
     
     .remove-attachment {
@@ -498,8 +509,8 @@ const MAIN_HTML = `<!DOCTYPE html>
       right: -6px;
       width: 20px;
       height: 20px;
-      background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-      border: 2px solid rgba(0,0,0,0.3);
+      background: #ef4444;
+      border: 2px solid var(--bg-main);
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -510,9 +521,9 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .input-container {
-      background: rgba(30, 60, 114, 0.3);
+      background: var(--card-bg);
       border-radius: 16px;
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      border: 2px solid rgba(139, 92, 246, 0.3);
       display: flex;
       align-items: flex-end;
       padding: 12px 16px;
@@ -521,14 +532,14 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .input-container:focus-within {
-      border-color: #d4af37;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
     }
     
     .input-container.drag-over {
-      border-color: #f4d03f;
-      background: rgba(212, 175, 55, 0.2);
-      box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+      border-color: var(--accent);
+      background: rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.4);
     }
     
     .attach-btn {
@@ -544,12 +555,12 @@ const MAIN_HTML = `<!DOCTYPE html>
       transition: all 0.3s;
       flex-shrink: 0;
       margin-right: 8px;
-      color: rgba(212, 175, 55, 0.8);
+      color: var(--text-secondary);
     }
     
     .attach-btn:hover {
-      background: rgba(212, 175, 55, 0.2);
-      color: #f4d03f;
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--primary);
     }
     
     .attach-btn svg {
@@ -571,17 +582,17 @@ const MAIN_HTML = `<!DOCTYPE html>
       transition: all 0.3s;
       flex-shrink: 0;
       margin-right: 8px;
-      color: rgba(212, 175, 55, 0.8);
+      color: var(--text-secondary);
     }
     
     .voice-btn:hover {
-      background: rgba(212, 175, 55, 0.2);
-      color: #f4d03f;
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--primary);
     }
     
     .voice-btn.recording {
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-      color: #0f2027;
+      background: #ef4444;
+      color: white;
       animation: pulse-red 1.5s ease-in-out infinite;
     }
     
@@ -605,7 +616,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       background: transparent;
       border: none;
       outline: none;
-      color: #f5f5f5;
+      color: var(--text-main);
       font-size: 16px;
       font-family: inherit;
       resize: none;
@@ -614,13 +625,13 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     textarea::placeholder {
-      color: rgba(212, 175, 55, 0.5);
+      color: var(--text-secondary);
     }
     
     .send-btn {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      background: var(--primary);
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -630,13 +641,13 @@ const MAIN_HTML = `<!DOCTYPE html>
       transition: all 0.3s ease;
       flex-shrink: 0;
       margin-left: 8px;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
     }
     
     .send-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+      background: var(--primary-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
     }
     
     .send-btn:active:not(:disabled) {
@@ -644,7 +655,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .send-btn:disabled {
-      background: rgba(212, 175, 55, 0.2);
+      background: rgba(139, 92, 246, 0.3);
       cursor: not-allowed;
       opacity: 0.5;
     }
