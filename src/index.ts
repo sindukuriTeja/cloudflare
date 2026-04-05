@@ -155,6 +155,35 @@ const MAIN_HTML = `<!DOCTYPE html>
       color: #8e8ea0;
     }
     
+    .auto-read-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: #2a2b32;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .auto-read-toggle:hover {
+      background: #343541;
+    }
+    
+    .auto-read-toggle input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    .auto-read-toggle label {
+      cursor: pointer;
+      font-size: 13px;
+      color: #ececf1;
+      flex: 1;
+    }
+    
     /* Main Content */
     .main-content {
       flex: 1;
@@ -251,25 +280,22 @@ const MAIN_HTML = `<!DOCTYPE html>
       position: absolute;
       top: 4px;
       right: 4px;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       background: #565869;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.6;
-      transition: opacity 0.2s;
-    }
-    
-    .message-wrapper:hover .speak-btn {
-      display: flex;
+      opacity: 0.8;
+      transition: opacity 0.2s, background 0.2s;
     }
     
     .speak-btn:hover {
       opacity: 1;
+      background: #6b6c7a;
     }
     
     .speak-btn.speaking {
@@ -630,6 +656,10 @@ const MAIN_HTML = `<!DOCTYPE html>
       <!-- Chat history items will go here -->
     </div>
     <div class="sidebar-footer">
+      <div class="auto-read-toggle" onclick="toggleAutoRead()">
+        <input type="checkbox" id="autoReadCheckbox" onclick="event.stopPropagation()">
+        <label for="autoReadCheckbox">🔊 Auto-read responses</label>
+      </div>
       Powered by Cloudflare Workers AI<br>
       <small style="opacity: 0.7;">Llama 3.3 70B + LLaVA Vision</small>
     </div>
@@ -718,6 +748,31 @@ const MAIN_HTML = `<!DOCTYPE html>
     var attachedFiles = [];
     var recognition = null;
     var isRecording = false;
+    var autoRead = false;
+    var currentSpeech = null;
+
+    // Load auto-read preference
+    if (localStorage.getItem('autoRead') === 'true') {
+      autoRead = true;
+      document.getElementById('autoReadCheckbox').checked = true;
+    }
+
+    function toggleAutoRead() {
+      var checkbox = document.getElementById('autoReadCheckbox');
+      checkbox.checked = !checkbox.checked;
+      autoRead = checkbox.checked;
+      localStorage.setItem('autoRead', autoRead);
+      
+      if (autoRead) {
+        statusDiv.textContent = 'Auto-read enabled ✓';
+        setTimeout(function() {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            statusDiv.textContent = 'Connected';
+            statusDiv.className = 'status-bar connected';
+          }
+        }, 2000);
+      }
+    }
 
     // Setup speech recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -834,6 +889,13 @@ const MAIN_HTML = `<!DOCTYPE html>
         } else if (data.type === 'message') {
           hideTyping();
           addMessage('assistant', data.content);
+          
+          // Auto-read if enabled
+          if (autoRead && 'speechSynthesis' in window) {
+            setTimeout(function() {
+              speakText(data.content, null, true);
+            }, 500);
+          }
         } else if (data.type === 'newChatCreated') {
           currentChatId = data.chatId;
         } else if (data.type === 'chatLoaded') {
@@ -1029,10 +1091,17 @@ const MAIN_HTML = `<!DOCTYPE html>
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    function speakText(text, button) {
+    function speakText(text, button, isAutoRead) {
+      // Stop any current speech
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
-        button.classList.remove('speaking');
+        if (currentSpeech) {
+          currentSpeech.classList.remove('speaking');
+          currentSpeech = null;
+        }
+        if (!isAutoRead && button) {
+          button.classList.remove('speaking');
+        }
         return;
       }
 
@@ -1041,14 +1110,23 @@ const MAIN_HTML = `<!DOCTYPE html>
       utterance.pitch = 1.0;
       utterance.volume = 1.0;
       
-      button.classList.add('speaking');
+      if (button) {
+        button.classList.add('speaking');
+        currentSpeech = button;
+      }
       
       utterance.onend = function() {
-        button.classList.remove('speaking');
+        if (button) {
+          button.classList.remove('speaking');
+        }
+        currentSpeech = null;
       };
       
       utterance.onerror = function() {
-        button.classList.remove('speaking');
+        if (button) {
+          button.classList.remove('speaking');
+        }
+        currentSpeech = null;
       };
       
       window.speechSynthesis.speak(utterance);
