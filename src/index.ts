@@ -91,6 +91,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       height: 100vh;
       display: flex;
       overflow: hidden;
+      margin: 0;
     }
     
     /* Sidebar */
@@ -99,7 +100,8 @@ const MAIN_HTML = `<!DOCTYPE html>
       background: #202123;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #4d4d4f;
+      border-right: 1px solid #2e2f33;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
     }
     
     .sidebar-header {
@@ -108,21 +110,30 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .new-chat-btn {
       width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid #565869;
-      border-radius: 6px;
-      color: #ececf1;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 600;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
     }
     
     .new-chat-btn:hover {
-      background: #2a2b32;
+      background: linear-gradient(135deg, #0d8a6a 0%, #0a7558 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 163, 127, 0.4);
+    }
+    
+    .new-chat-btn:active {
+      transform: translateY(0);
     }
     
     .chat-history {
@@ -132,20 +143,34 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .chat-item {
-      padding: 10px 12px;
-      border-radius: 6px;
+      padding: 12px 14px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       color: #ececf1;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      position: relative;
+    }
+    
+    .chat-item::before {
+      content: '💬';
+      margin-right: 8px;
+      opacity: 0.7;
     }
     
     .chat-item:hover {
-      background: #2a2b32;
+      background: linear-gradient(135deg, #2a2b32 0%, #343541 100%);
+      padding-left: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .chat-item.active {
+      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
+      font-weight: 600;
     }
     
     .sidebar-footer {
@@ -158,17 +183,20 @@ const MAIN_HTML = `<!DOCTYPE html>
     .auto-read-toggle {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      background: #2a2b32;
-      border-radius: 6px;
+      gap: 10px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #2a2b32 0%, #343541 100%);
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
     }
     
     .auto-read-toggle:hover {
-      background: #343541;
+      background: linear-gradient(135deg, #343541 0%, #3d3e4f 100%);
+      border-color: #10a37f;
+      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.2);
     }
     
     .auto-read-toggle input[type="checkbox"] {
@@ -194,16 +222,19 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     /* Status Bar */
     .status-bar {
-      padding: 10px 20px;
+      padding: 12px 20px;
       background: #444654;
       text-align: center;
-      font-size: 12px;
-      border-bottom: 1px solid #4d4d4f;
+      font-size: 13px;
+      font-weight: 500;
+      border-bottom: 1px solid #2e2f33;
+      transition: all 0.3s ease;
     }
     
     .status-bar.connected {
-      background: #10a37f;
+      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
       color: white;
+      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
     }
     
     /* Messages Area */
@@ -250,22 +281,23 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 2px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     
     .avatar.user {
-      background: #5436da;
+      background: linear-gradient(135deg, #5436da 0%, #6b46e5 100%);
     }
     
     .avatar.assistant {
-      background: #10a37f;
+      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
     }
     
     .message-text {
@@ -346,18 +378,21 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .example-card {
-      background: #444654;
-      padding: 16px;
-      border-radius: 8px;
+      background: linear-gradient(135deg, #444654 0%, #4d4d5f 100%);
+      padding: 20px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
       text-align: left;
       border: 1px solid transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     
     .example-card:hover {
-      background: #4d4d4f;
-      border-color: #565869;
+      background: linear-gradient(135deg, #4d4d5f 0%, #565869 100%);
+      border-color: #10a37f;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(16, 163, 127, 0.2);
     }
     
     .example-card h3 {
@@ -559,22 +594,29 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .send-btn {
-      width: 32px;
-      height: 32px;
-      background: #19c37d;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
       flex-shrink: 0;
       margin-left: 8px;
+      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
     }
     
     .send-btn:hover:not(:disabled) {
-      background: #1a7f5a;
+      background: linear-gradient(135deg, #0d8a6a 0%, #0a7558 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 163, 127, 0.4);
+    }
+    
+    .send-btn:active:not(:disabled) {
+      transform: translateY(0);
     }
     
     .send-btn:disabled {
