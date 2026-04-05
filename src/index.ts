@@ -86,8 +86,8 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-      background: #343541;
-      color: #ececf1;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #f5f5f5;
       height: 100vh;
       display: flex;
       overflow: hidden;
@@ -97,11 +97,11 @@ const MAIN_HTML = `<!DOCTYPE html>
     /* Sidebar */
     .sidebar {
       width: 260px;
-      background: #202123;
+      background: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #2e2f33;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      border-right: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 2px 0 20px rgba(0,0,0,0.4);
     }
     
     .sidebar-header {
@@ -111,25 +111,26 @@ const MAIN_HTML = `<!DOCTYPE html>
     .new-chat-btn {
       width: 100%;
       padding: 14px 16px;
-      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
       border: none;
-      border-radius: 8px;
-      color: white;
+      border-radius: 12px;
+      color: #0f2027;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      letter-spacing: 0.5px;
     }
     
     .new-chat-btn:hover {
-      background: linear-gradient(135deg, #0d8a6a 0%, #0a7558 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 163, 127, 0.4);
+      background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
     }
     
     .new-chat-btn:active {
@@ -144,40 +145,46 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .chat-item {
       padding: 12px 14px;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 14px;
       margin-bottom: 6px;
-      color: #ececf1;
+      color: #f5f5f5;
       transition: all 0.2s ease;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       position: relative;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212, 175, 55, 0.1);
     }
     
     .chat-item::before {
       content: '💬';
       margin-right: 8px;
-      opacity: 0.7;
+      opacity: 0.8;
     }
     
     .chat-item:hover {
-      background: linear-gradient(135deg, #2a2b32 0%, #343541 100%);
+      background: rgba(212, 175, 55, 0.15);
       padding-left: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
+      border-color: rgba(212, 175, 55, 0.4);
     }
     
     .chat-item.active {
-      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
-      font-weight: 600;
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      color: #0f2027;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.5);
+      border-color: #d4af37;
     }
     
     .sidebar-footer {
       padding: 12px;
-      border-top: 1px solid #4d4d4f;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
       font-size: 12px;
-      color: #8e8ea0;
+      color: rgba(245, 245, 245, 0.7);
     }
     
     .auto-read-toggle {
@@ -186,17 +193,17 @@ const MAIN_HTML = `<!DOCTYPE html>
       gap: 10px;
       padding: 10px 14px;
       margin-bottom: 12px;
-      background: linear-gradient(135deg, #2a2b32 0%, #343541 100%);
-      border-radius: 8px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
-      border: 1px solid transparent;
+      border: 1px solid rgba(212, 175, 55, 0.2);
     }
     
     .auto-read-toggle:hover {
-      background: linear-gradient(135deg, #343541 0%, #3d3e4f 100%);
-      border-color: #10a37f;
-      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.2);
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #d4af37;
+      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
     }
     
     .auto-read-toggle input[type="checkbox"] {
@@ -208,7 +215,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     .auto-read-toggle label {
       cursor: pointer;
       font-size: 13px;
-      color: #ececf1;
+      color: rgba(255,255,255,0.9);
       flex: 1;
     }
     
@@ -223,18 +230,20 @@ const MAIN_HTML = `<!DOCTYPE html>
     /* Status Bar */
     .status-bar {
       padding: 12px 20px;
-      background: #444654;
+      background: rgba(15, 32, 39, 0.8);
       text-align: center;
       font-size: 13px;
       font-weight: 500;
-      border-bottom: 1px solid #2e2f33;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
       transition: all 0.3s ease;
+      color: rgba(245, 245, 245, 0.8);
     }
     
     .status-bar.connected {
-      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
-      color: white;
-      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      color: #0f2027;
+      font-weight: 700;
+      box-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
     }
     
     /* Messages Area */
@@ -254,22 +263,26 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .messages-container::-webkit-scrollbar-thumb {
-      background: #565869;
+      background: rgba(212, 175, 55, 0.5);
       border-radius: 4px;
+    }
+    
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.7);
     }
     
     .message-wrapper {
       width: 100%;
-      border-bottom: 1px solid #4d4d4f;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
       padding: 24px 0;
     }
     
     .message-wrapper.user {
-      background: #343541;
+      background: rgba(30, 60, 114, 0.3);
     }
     
     .message-wrapper.assistant {
-      background: #444654;
+      background: rgba(15, 32, 39, 0.4);
     }
     
     .message-content {
@@ -293,11 +306,13 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .avatar.user {
-      background: linear-gradient(135deg, #5436da 0%, #6b46e5 100%);
+      background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+      border: 2px solid #d4af37;
     }
     
     .avatar.assistant {
-      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      border: 2px solid #d4af37;
     }
     
     .message-text {
@@ -314,7 +329,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       right: 4px;
       width: 28px;
       height: 28px;
-      background: #565869;
+      background: rgba(212, 175, 55, 0.2);
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -327,11 +342,11 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .speak-btn:hover {
       opacity: 1;
-      background: #6b6c7a;
+      background: rgba(212, 175, 55, 0.4);
     }
     
     .speak-btn.speaking {
-      background: #19c37d;
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
       opacity: 1;
       animation: pulse-green 1s ease-in-out infinite;
     }
@@ -378,38 +393,42 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .example-card {
-      background: linear-gradient(135deg, #444654 0%, #4d4d5f 100%);
+      background: rgba(212, 175, 55, 0.1);
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: left;
-      border: 1px solid transparent;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
     }
     
     .example-card:hover {
-      background: linear-gradient(135deg, #4d4d5f 0%, #565869 100%);
-      border-color: #10a37f;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(16, 163, 127, 0.2);
+      background: rgba(212, 175, 55, 0.2);
+      border-color: #d4af37;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
     }
     
     .example-card h3 {
       font-size: 14px;
       margin-bottom: 8px;
-      color: #ececf1;
+      color: #f4d03f;
+      font-weight: 700;
     }
     
     .example-card p {
       font-size: 13px;
-      color: #c5c5d2;
+      color: rgba(245, 245, 245, 0.9);
     }
     
     /* Input Area */
     .input-area {
       padding: 20px;
-      background: #343541;
+      background: rgba(15, 32, 39, 0.6);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
     }
     
     .input-wrapper {
@@ -427,9 +446,9 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-item {
       position: relative;
-      background: #40414f;
-      border: 1px solid #565869;
-      border-radius: 8px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 10px;
       padding: 8px;
       display: flex;
       align-items: center;
@@ -447,8 +466,8 @@ const MAIN_HTML = `<!DOCTYPE html>
     .attachment-item .file-icon {
       width: 40px;
       height: 40px;
-      background: #565869;
-      border-radius: 4px;
+      background: rgba(102, 126, 234, 0.3);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -462,7 +481,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-name {
       font-size: 12px;
-      color: #ececf1;
+      color: rgba(255,255,255,0.9);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -470,7 +489,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     
     .attachment-size {
       font-size: 10px;
-      color: #8e8ea0;
+      color: rgba(255,255,255,0.6);
     }
     
     .remove-attachment {
@@ -479,8 +498,8 @@ const MAIN_HTML = `<!DOCTYPE html>
       right: -6px;
       width: 20px;
       height: 20px;
-      background: #ef4444;
-      border: 2px solid #343541;
+      background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+      border: 2px solid rgba(0,0,0,0.3);
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -491,22 +510,25 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .input-container {
-      background: #40414f;
-      border-radius: 12px;
-      border: 1px solid #565869;
+      background: rgba(30, 60, 114, 0.3);
+      border-radius: 16px;
+      border: 2px solid rgba(212, 175, 55, 0.3);
       display: flex;
       align-items: flex-end;
       padding: 12px 16px;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(10px);
     }
     
     .input-container:focus-within {
-      border-color: #8e8ea0;
+      border-color: #d4af37;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
     }
     
     .input-container.drag-over {
-      border-color: #19c37d;
-      background: #4a4b56;
+      border-color: #f4d03f;
+      background: rgba(212, 175, 55, 0.2);
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
     }
     
     .attach-btn {
@@ -514,19 +536,20 @@ const MAIN_HTML = `<!DOCTYPE html>
       height: 32px;
       background: transparent;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.3s;
       flex-shrink: 0;
       margin-right: 8px;
-      color: #8e8ea0;
+      color: rgba(212, 175, 55, 0.8);
     }
     
     .attach-btn:hover {
-      background: #565869;
+      background: rgba(212, 175, 55, 0.2);
+      color: #f4d03f;
     }
     
     .attach-btn svg {
@@ -540,24 +563,25 @@ const MAIN_HTML = `<!DOCTYPE html>
       height: 32px;
       background: transparent;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.3s;
       flex-shrink: 0;
       margin-right: 8px;
-      color: #8e8ea0;
+      color: rgba(212, 175, 55, 0.8);
     }
     
     .voice-btn:hover {
-      background: #565869;
+      background: rgba(212, 175, 55, 0.2);
+      color: #f4d03f;
     }
     
     .voice-btn.recording {
-      background: #ef4444;
-      color: white;
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      color: #0f2027;
       animation: pulse-red 1.5s ease-in-out infinite;
     }
     
@@ -581,7 +605,7 @@ const MAIN_HTML = `<!DOCTYPE html>
       background: transparent;
       border: none;
       outline: none;
-      color: #ececf1;
+      color: #f5f5f5;
       font-size: 16px;
       font-family: inherit;
       resize: none;
@@ -590,15 +614,15 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     textarea::placeholder {
-      color: #8e8ea0;
+      color: rgba(212, 175, 55, 0.5);
     }
     
     .send-btn {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #10a37f 0%, #0d8a6a 100%);
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -606,13 +630,13 @@ const MAIN_HTML = `<!DOCTYPE html>
       transition: all 0.3s ease;
       flex-shrink: 0;
       margin-left: 8px;
-      box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
     }
     
     .send-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #0d8a6a 0%, #0a7558 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 163, 127, 0.4);
+      background: linear-gradient(135deg, #f4d03f 0%, #d4af37 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
     }
     
     .send-btn:active:not(:disabled) {
@@ -620,7 +644,7 @@ const MAIN_HTML = `<!DOCTYPE html>
     }
     
     .send-btn:disabled {
-      background: #40414f;
+      background: rgba(212, 175, 55, 0.2);
       cursor: not-allowed;
       opacity: 0.5;
     }
